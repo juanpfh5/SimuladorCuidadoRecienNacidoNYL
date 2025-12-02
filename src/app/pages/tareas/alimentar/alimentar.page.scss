@@ -1,0 +1,79 @@
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.baby-area {
+  width: 250px;
+  height: 300px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.baby-img {
+  width: 100%;
+}
+
+.food-items {
+  display: flex;
+  gap: 20px;
+  margin-top: 40px;
+  position: relative;
+  width: 220px;   /* espacio para las dos imágenes */
+  height: 120px;  /* alto para verlas */
+}
+
+.food {
+  width: 90px;
+  position: absolute;
+  cursor: grab;
+  touch-action: none;
+}
+
+/* Ubicación del biberón */
+.food:nth-child(1) {
+  left: 10px;
+  top: 10px;
+}
+
+/* Ubicación del Gerber */
+.food:nth-child(2) {
+  left: 120px;
+  top: 50px;
+}
+
+.dragging {
+  pointer-events: none;
+  z-index: 1000;
+  cursor: grabbing;
+}
+
+.food {
+  transition: left 0.18s ease, top 0.18s ease, transform 0.12s ease;
+}
+
+.progress-container {
+  width: 90%;
+  height: 20px;
+  background: #ddd;
+  margin: 15px auto;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(45deg, #ff9900, #ffcc66);
+  transition: width 0.3s ease-out;
+}
+
+.done-msg {
+  text-align: center;
+  margin-top: 120px;
+  font-size: 20px;
+  color: green;
+  font-weight: bold;
+}
