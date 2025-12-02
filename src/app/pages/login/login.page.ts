@@ -21,8 +21,12 @@ import { RouterModule } from '@angular/router';
 
 // }
 
+
+
+import { Auth } from '../../services/auth';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-login',
@@ -32,16 +36,16 @@ import { HttpClient } from '@angular/common/http';
   imports: [CommonModule, FormsModule, IonicModule, RouterModule]
 })
 export class LoginPage implements OnInit {
-
   curp = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private auth: Auth) {}
 
   login() {
     this.http.post('http://localhost:3000/login', { curp: this.curp })
       .subscribe({
         next: (res: any) => {
           console.log('Login correcto', res);
+          this.auth.setCurp(this.curp);
           this.router.navigate(['/home']);
         },
         error: () => {
@@ -49,6 +53,6 @@ export class LoginPage implements OnInit {
         }
       });
   }
-  ngOnInit() {
-  }
+
+  ngOnInit() {}
 }

@@ -1,38 +1,47 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
+  <ion-toolbar color="primary" class="header-toolbar">
+    <ion-title class="header-title">
+      Mi Bebé
     </ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button color="danger" fill="solid" shape="round" (click)="logout()">
+        Cerrar sesión
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="baby-bg">
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div class="baby-container">
+
+    <!-- Imagen del bebé -->
+    <img class="baby-img" src="assets/baby.png" alt="bebé">
+
+    <!-- Botones -->
+    <div class="tasks-container">
+      <ion-button expand="block" shape="round" class="task-btn alimentar" routerLink="/tareas/alimentar">
+        🍓 Alimentar
+      </ion-button>
+
+      <ion-button expand="block" shape="round" class="task-btn banar" routerLink="/tareas/banar">
+        🛁 Bañar
+      </ion-button>
+
+      <ion-button expand="block" shape="round" class="task-btn dormir" routerLink="/tareas/dormir">
+        🌙 Dormir
+      </ion-button>
+
+      <ion-button expand="block" shape="round" class="task-btn medicina" routerLink="/tareas/medicina">
+        💊 Medicina
+      </ion-button>
+
+      <ion-button expand="block" shape="round" class="task-btn panal" routerLink="/tareas/panal">
+        🍼 Pañal
+      </ion-button>
+    </div>
+
   </div>
 
-  <form>
-    <ion-button type="button" expand="block" fill="clear" routerLink="/tareas/alimentar">
-      Alimentar
-    </ion-button>
-    <ion-button type="button" expand="block" fill="clear" routerLink="/tareas/banar">
-      Bañar
-    </ion-button>
-    <ion-button type="button" expand="block" fill="clear" routerLink="/tareas/dormir">
-      Dormir
-    </ion-button>
-    <ion-button type="button" expand="block" fill="clear" routerLink="/tareas/medicina">
-      Medicina
-    </ion-button>
-    <ion-button type="button" expand="block" fill="clear" routerLink="/tareas/panal">
-      Pañal
-    </ion-button>
-  </form>
 </ion-content>
