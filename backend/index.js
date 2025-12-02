@@ -22,10 +22,10 @@ db.connect(err => {
 
 // --- ENDPOINT: REGISTRO ---
 app.post('/registro', (req, res) => {
-    const { nombre, edad, curp } = req.body;
+    const { curp, nombre, edad, bebe_vivo } = req.body;
 
-    const query = 'INSERT INTO usuarios (nombre, edad, curp) VALUES (?, ?, ?)';
-    db.query(query, [nombre, edad, curp], (err, result) => {
+    const query = 'INSERT INTO usuarios (curp, nombre, edad, bebe_vivo) VALUES (?, ?, ?, ?)';
+    db.query(query, [curp, nombre, edad, bebe_vivo], (err, result) => {
         if (err) return res.status(400).json({ error: err });
         res.json({ msg: 'Usuario registrado correctamente' });
     });

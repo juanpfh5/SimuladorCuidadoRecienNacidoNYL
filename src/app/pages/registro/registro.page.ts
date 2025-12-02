@@ -33,9 +33,10 @@ export class RegistroPage implements OnInit {
     }
 
     const payload = {
+      curp: this.curp,
       nombre: this.nombre,
       edad: this.edad,
-      curp: this.curp
+      bebe_vivo: true
     };
 
     this.http.post(`${this.API_URL}/registro`, payload)
