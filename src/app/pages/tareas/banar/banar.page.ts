@@ -28,6 +28,9 @@ export class BanarPage {
   offsetX = 0;
   offsetY = 0;
   busy = false; // when an activity is showing on baby for the duration
+  // hold timer state: user must keep the item over baby for this duration
+  holdTimer: any = null;
+  holdCounted = false; // whether the current activeItem hold already counted
 
   ngAfterViewInit() {
     this.draggableItems.forEach(item => {
@@ -82,6 +85,10 @@ export class BanarPage {
 
     try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) {}
     el.classList.add('dragging');
+
+    // reset hold tracking when a new drag starts
+    this.clearHoldTimer();
+    this.holdCounted = false;
   }
 
   moveDrag(event: any) {
@@ -97,6 +104,29 @@ export class BanarPage {
 
     this.activeItem.style.left = left + 'px';
     this.activeItem.style.top = top + 'px';
+
+    // Check overlap and start/stop hold timer accordingly
+    const baby = document.getElementById('baby-area');
+    if (!baby) return;
+    const babyRect = baby.getBoundingClientRect();
+    const itemRect = this.activeItem.getBoundingClientRect();
+
+    const isOverlapping =
+      !(itemRect.right < babyRect.left ||
+        itemRect.left > babyRect.right ||
+        itemRect.bottom < babyRect.top ||
+        itemRect.top > babyRect.bottom);
+
+    const name = this.activeItem.getAttribute('data-name');
+    const expected = this.expectedStepForName(name || '');
+
+    if (isOverlapping && !this.busy && !this.holdCounted && expected === this.step) {
+      // start hold timer if not already started
+      if (!this.holdTimer) this.startHoldTimer(this.activeItem);
+    } else {
+      // moved away or not the expected step -> cancel timer
+      if (this.holdTimer) this.clearHoldTimer();
+    }
   }
 
   endDrag(event: any) {
@@ -112,8 +142,9 @@ export class BanarPage {
         itemRect.bottom < babyRect.top ||
         itemRect.top > babyRect.bottom);
 
-    if (isOverlapping && !this.busy) {
-      this.handleDropOnBaby(this.activeItem);
+    // If user releases while hold timer running, cancel it (they didn't keep it)
+    if (this.holdTimer) {
+      this.clearHoldTimer();
     }
 
     try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) {}
@@ -137,16 +168,62 @@ export class BanarPage {
   handleDropOnBaby(el: HTMLElement) {
     if (this.completed) return;
     const name = el.getAttribute('data-name');
-    if (this.step === 1 && name === 'shampoo') {
-      this.placeTemporarilyOnBaby(el, 2, false);
-    } else if (this.step === 2 && name === 'jabon') {
-      this.placeTemporarilyOnBaby(el, 3, false);
-    } else if (this.step === 3 && name === 'regadera') {
-      this.placeTemporarilyOnBaby(el, 4, false);
-    } else if (this.step === 5 && name === 'toalla') {
-      this.placeTemporarilyOnBaby(el, 6, true);
+    // With the new flow, dropping isn't what counts — holding does. Keep backward compatibility: if a drop happens and hold already counted, ignore.
+    console.debug('[Bañar] drop ignored - use hold-to-apply flow', this.step, name);
+  }
+
+  expectedStepForName(name: string) {
+    switch (name) {
+      case 'shampoo': return 1;
+      case 'jabon': return 2;
+      case 'regadera': return 3;
+      case 'toalla': return 5;
+      default: return -1;
+    }
+  }
+
+  startHoldTimer(el: HTMLElement) {
+    this.clearHoldTimer();
+    this.holdTimer = window.setTimeout(() => {
+      this.onHoldComplete(el);
+    }, 4000);
+  }
+
+  clearHoldTimer() {
+    if (this.holdTimer) {
+      clearTimeout(this.holdTimer);
+      this.holdTimer = null;
+    }
+  }
+
+  onHoldComplete(el: HTMLElement) {
+    // mark counted so it doesn't retrigger
+    this.holdCounted = true;
+    this.holdTimer = null;
+
+    const name = el.getAttribute('data-name');
+    const expected = this.expectedStepForName(name || '');
+    if (expected !== this.step) return;
+
+    // determine next step and whether final
+    let nextStep = this.step + 1;
+    const final = (name === 'toalla' && this.step === 5);
+
+    // visual feedback on baby
+    const baby = document.getElementById('baby-area');
+    if (baby) {
+      baby.classList.add('success');
+      setTimeout(() => baby.classList.remove('success'), 600);
+    }
+
+    // advance state
+    this.step = nextStep;
+    if (final) {
+      this.babyImage = 'assets/imgs/banar/Bebe.png';
+      this.incrementProgress(true);
+      this.completed = true;
     } else {
-      console.debug('[Bañar] drop ignored - incorrect order', this.step, name);
+      this.incrementProgress();
     }
   }
 

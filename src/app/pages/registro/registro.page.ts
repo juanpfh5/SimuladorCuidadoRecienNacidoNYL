@@ -5,6 +5,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-registro',
@@ -20,7 +21,7 @@ export class RegistroPage implements OnInit {
   curp = '';
 
   // Cambia aquí la URL si tu backend corre en otro puerto/host
-  private API_URL = 'http://localhost:3000';
+  private API_URL = environment.API_URL;
 
   constructor(private http: HttpClient, private router: Router) {}
 

@@ -26,6 +26,7 @@ import { RouterModule } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -40,27 +41,37 @@ export class LoginPage implements OnInit {
 
   constructor(private http: HttpClient, private router: Router, private auth: Auth) { }
 
+  private API_URL = environment.API_URL;
+
   login() {
-    this.http.post('http://localhost:3000/login', { curp: this.curp })
+    if (!this.curp || !this.curp.trim()) {
+      alert('Por favor ingresa la CURP');
+      return;
+    }
+
+    const url = `${this.API_URL}/login`;
+
+    this.http.post(url, { curp: this.curp })
       .subscribe({
         next: (res: any) => {
           console.log('Login correcto', res);
           this.auth.setCurp(this.curp);
-          console.log('res.bebe_vivo: ', res.usuario.bebe_vivo);
+          console.log('res.bebe_vivo: ', res.usuario?.bebe_vivo);
           // Blur active element to avoid accessibility warnings when navigating
           try { (document.activeElement as HTMLElement)?.blur(); } catch (e) { }
 
           // Si el backend indica que el bebé no está vivo, ir a /morir
-          // Aceptamos false o 0 (algún backend devuelve 0 en lugar de false)
-          if (res && (res.usuario.bebe_vivo === false || res.usuario.bebe_vivo === 0 || res.usuario.bebe_vivo === '0')) {
+          if (res && (res.usuario?.bebe_vivo === false || res.usuario?.bebe_vivo === 0 || res.usuario?.bebe_vivo === '0')) {
             this.router.navigate(['/morir']);
             return;
           }
 
           this.router.navigate(['/home']);
         },
-        error: () => {
-          alert('CURP incorrecta o no registrada');
+        error: (err: any) => {
+          console.error('[Login] error response:', err);
+          const serverMsg = err?.error?.msg || err?.error || err?.message || JSON.stringify(err);
+          alert('Error al iniciar sesión: ' + serverMsg + '\nURL: ' + url);
         }
       });
   }
