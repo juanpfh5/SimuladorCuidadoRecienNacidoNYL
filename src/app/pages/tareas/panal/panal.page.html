@@ -1,8 +1,21 @@
-<!-- <ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>Cambio de Pañal</ion-title>
+    <ion-buttons slot="start">
+      <ion-button routerLink="/home" fill="clear">
+        <
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Cambiar pañal</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="openInfo($event)" title="Información de la actividad">
+        <!-- <ion-icon slot="icon-only" name="information-circle-outline"></ion-icon> -->
+         ---
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
-</ion-header> -->
+</ion-header>
 
 <ion-content (pointermove)="moveDrag($event)" (pointerup)="endDrag($event)" (pointercancel)="endDrag($event)">
 

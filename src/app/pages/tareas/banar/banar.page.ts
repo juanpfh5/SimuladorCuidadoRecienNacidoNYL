@@ -1,13 +1,15 @@
 import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ActividadInfoComponent } from './actividad-info.component';
 
 @Component({
   selector: 'app-banar',
   templateUrl: './banar.page.html',
   styleUrls: ['./banar.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, RouterModule]
 })
 export class BanarPage {
 
@@ -21,6 +23,8 @@ export class BanarPage {
 
   babyImage = 'assets/imgs/banar/BebeSucio.png';
 
+  constructor(private popoverCtrl: PopoverController) { }
+
   @ViewChildren('draggable') draggableItems!: QueryList<ElementRef>;
   originalPositions = new Map<string, { x: number; y: number }>();
 
@@ -31,6 +35,16 @@ export class BanarPage {
   // hold timer state: user must keep the item over baby for this duration
   holdTimer: any = null;
   holdCounted = false; // whether the current activeItem hold already counted
+
+  async openInfo(ev: Event) {
+    const pop = await this.popoverCtrl.create({
+      component: ActividadInfoComponent,
+      event: ev,
+      translucent: true,
+      backdropDismiss: true
+    });
+    await pop.present();
+  }
 
   ngAfterViewInit() {
     this.draggableItems.forEach(item => {
@@ -83,7 +97,7 @@ export class BanarPage {
     this.offsetX = clientX - rect.left;
     this.offsetY = clientY - rect.top;
 
-    try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) {}
+    try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) { }
     el.classList.add('dragging');
 
     // reset hold tracking when a new drag starts
@@ -147,7 +161,7 @@ export class BanarPage {
       this.clearHoldTimer();
     }
 
-    try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) {}
+    try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) { }
 
     // restore original position by data-name (only if not busy and element isn't currently placed on baby)
     const name = this.activeItem.getAttribute('data-name');
@@ -285,6 +299,6 @@ export class BanarPage {
   incrementProgress(final = false) {
     if (final) { this.progress = 100; return; }
     // 6 steps total -> use fractional increment
-    this.progress = Math.min(100, Number((this.progress + 100/6).toFixed(2)));
+    this.progress = Math.min(100, Number((this.progress + 100 / 6).toFixed(2)));
   }
 }

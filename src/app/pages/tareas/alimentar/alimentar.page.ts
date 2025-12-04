@@ -20,15 +20,17 @@ export class AlimentarPage implements OnInit {
 } */
 
 import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ActividadInfoComponent } from './actividad-info.component';
 
 @Component({
   selector: 'app-alimentar',
   templateUrl: './alimentar.page.html',
   styleUrls: ['./alimentar.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, RouterModule]
 })
 export class AlimentarPage {
 
@@ -40,6 +42,8 @@ export class AlimentarPage {
   activeItem: HTMLElement | null = null;
   offsetX = 0;
   offsetY = 0;
+
+  constructor(private popoverCtrl: PopoverController) { }
 
   ngAfterViewInit() {
     // Guardar posiciones iniciales relativas al contenedor (.food-items)
@@ -60,6 +64,16 @@ export class AlimentarPage {
       if (!el.style.left) el.style.left = left + 'px';
       if (!el.style.top) el.style.top = top + 'px';
     });
+  }
+
+  async openInfo(ev: Event) {
+    const pop = await this.popoverCtrl.create({
+      component: ActividadInfoComponent,
+      event: ev,
+      translucent: true,
+      backdropDismiss: true
+    });
+    await pop.present();
   }
 
   startDrag(event: any, item: EventTarget | null) {
@@ -87,7 +101,7 @@ export class AlimentarPage {
     this.offsetY = clientY - rect.top;
 
     // Capturar el pointer para recibir eventos aunque el puntero salga del elemento
-    try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) {}
+    try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) { }
 
     el.classList.add('dragging');
   }
@@ -128,7 +142,7 @@ export class AlimentarPage {
 
     // Regresar el objeto a su posición original
     // Liberar pointer capture si es posible
-    try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) {}
+    try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) { }
 
     const original = this.originalPositions.get(this.activeItem);
     if (original) {

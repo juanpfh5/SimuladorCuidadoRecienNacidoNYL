@@ -1,16 +1,17 @@
 import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ActividadInfoComponent } from './actividad-info.component';
 
 @Component({
   selector: 'app-medicina',
   templateUrl: './medicina.page.html',
   styleUrls: ['./medicina.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, RouterModule]
 })
 export class MedicinaPage {
-
   // Progress and state
   progress = 0;
   completed = false;
@@ -27,6 +28,18 @@ export class MedicinaPage {
   activeItem: HTMLElement | null = null;
   offsetX = 0;
   offsetY = 0;
+
+  constructor(private popoverCtrl: PopoverController) { }
+
+  async openInfo(ev: Event) {
+    const pop = await this.popoverCtrl.create({
+      component: ActividadInfoComponent,
+      event: ev,
+      translucent: true,
+      backdropDismiss: true
+    });
+    await pop.present();
+  }
 
   ngAfterViewInit() {
     this.draggableItems.forEach(item => {
@@ -65,7 +78,7 @@ export class MedicinaPage {
     this.offsetX = clientX - rect.left;
     this.offsetY = clientY - rect.top;
 
-    try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) {}
+    try { (el as any).setPointerCapture((event as any).pointerId); } catch (e) { }
     el.classList.add('dragging');
   }
 
@@ -101,7 +114,7 @@ export class MedicinaPage {
       this.handleDropOnBaby(this.activeItem);
     }
 
-    try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) {}
+    try { (this.activeItem as any).releasePointerCapture((event as any).pointerId); } catch (e) { }
 
     // restore original position by data-name
     const name = this.activeItem.getAttribute('data-name');

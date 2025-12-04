@@ -1,25 +1,39 @@
 import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { ActividadInfoComponent } from './actividad-info.component';
 
 @Component({
   selector: 'app-dormir',
   templateUrl: './dormir.page.html',
   styleUrls: ['./dormir.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, RouterModule]
 })
 export class DormirPage {
 
   progress = 0;
   completed = false;
 
-  step = 0; 
+  step = 0;
   // 0 = click bebé
   // 1 = cobija
   // 2 = chupon
   // 3 = apagar luz (debe apagarse antes de arrullar)
   // 4 = arrullo
+
+  constructor(private popoverCtrl: PopoverController) { }
+
+  async openInfo(ev: Event) {
+    const pop = await this.popoverCtrl.create({
+      component: ActividadInfoComponent,
+      event: ev,
+      translucent: true,
+      backdropDismiss: true
+    });
+    await pop.present();
+  }
 
   lightOff = false;
 
@@ -81,7 +95,7 @@ export class DormirPage {
     this.offsetX = clientX - rect.left;
     this.offsetY = clientY - rect.top;
 
-    try { el.setPointerCapture(event.pointerId); } catch {}
+    try { el.setPointerCapture(event.pointerId); } catch { }
 
     el.classList.add('dragging');
   }
@@ -120,7 +134,7 @@ export class DormirPage {
       this.handleDropOnBaby(this.activeItem);
     }
 
-    try { this.activeItem.releasePointerCapture(event.pointerId); } catch {}
+    try { this.activeItem.releasePointerCapture(event.pointerId); } catch { }
 
     const name = this.activeItem.getAttribute('data-name');
     if (name) {
