@@ -1,0 +1,65 @@
+
+/* Dark variant of the login page style for the 'morir' page */
+:root{
+	--dark-top: #071022;
+	--dark-mid: #0b1b2a;
+	--dark-bot: #07141d;
+	--accent-rose: #ff6a88;
+	--accent-soft: #8b5cf6;
+}
+
+ion-content.dark-page{
+	--background: none;
+	background: radial-gradient(1200px 600px at 10% 10%, rgba(100,85,130,0.08), transparent 8%), linear-gradient(180deg, var(--dark-top) 0%, var(--dark-mid) 55%, var(--dark-bot) 100%);
+	background-size: cover;
+	color: #f7f9fb;
+	min-height: 100vh;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	padding: 14px 12px 64px;
+	font-family: 'Poppins', 'Segoe UI', sans-serif;
+	overflow: hidden;
+}
+
+.falling-area{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+.drop{ position:absolute; border-radius:14px; opacity:0.22; transform:translateY(-200%); filter: blur(0.6px); pointer-events:none; }
+.d1{ width:160px; height:160px; background:linear-gradient(135deg, rgba(140,82,255,0.22), rgba(255,106,136,0.12)); left:-8%; top:-6%; animation:fall 12s linear infinite 0s; border-radius:28px; }
+.d2{ width:110px; height:110px; background:linear-gradient(135deg, rgba(30,60,120,0.22), rgba(100,150,220,0.12)); left:12%; top:-18%; animation:fall 10.5s linear infinite 1.2s; border-radius:50%; }
+.d3{ width:180px; height:120px; background:linear-gradient(135deg, rgba(255,150,180,0.14), rgba(180,120,255,0.10)); left:44%; top:-28%; animation:fall 13s linear infinite 0.6s; border-radius:32px; }
+.d4{ width:130px; height:130px; background:linear-gradient(135deg, rgba(60,80,120,0.16), rgba(120,90,200,0.10)); left:70%; top:-14%; animation:fall 10s linear infinite 1.8s; border-radius:22px; }
+.d5{ width:90px; height:190px; background:linear-gradient(135deg, rgba(100,120,140,0.12), rgba(90,160,180,0.08)); left:86%; top:-5%; animation:fall 11.6s linear infinite 0.9s; border-radius:20px; }
+
+@keyframes fall{
+	0%{ transform: translateY(-30vh) rotate(0deg); opacity:0 }
+	10%{ opacity:0.28 }
+	75%{ opacity:0.28 }
+	100%{ transform: translateY(120vh) rotate(360deg); opacity:0 }
+}
+
+.center-wrap{ width:100%; min-height: calc(100vh - 28px); display:flex; align-items:center; justify-content:center; position:relative; z-index:1000; }
+.card{ width:100%; max-width:420px; background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border-radius:18px; box-shadow: 0 18px 36px rgba(2,6,23,0.6); padding:20px 18px; display:flex; flex-direction:column; gap:12px; z-index:1001; border:1px solid rgba(255,255,255,0.04); }
+
+.page-title{
+	font-size:1.45rem;
+	text-align:center;
+	margin:6px 6px 4px;
+	font-weight:800;
+	background: linear-gradient(90deg, var(--accent-rose), var(--accent-soft));
+	-webkit-background-clip:text;
+	background-clip:text;
+	color: transparent;
+}
+.subtitle{ text-align:center; color: rgba(247,249,251,0.86); margin:0 8px 10px; font-weight:600; }
+
+.message-block{ color: rgba(247,249,251,0.9); font-size:0.98rem; text-align:center; margin-top:4px; }
+
+.actions{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+ion-button.enter-btn{ --background: linear-gradient(90deg, #ff6a88, #7c4dff); color:#fff; border-radius:12px; font-weight:800; }
+
+/* Make proportions good on small devices */
+@media (max-width:420px){
+	.card{ margin: 0 6px; padding:14px; }
+	.page-title{ font-size:1.35rem }
+}
+

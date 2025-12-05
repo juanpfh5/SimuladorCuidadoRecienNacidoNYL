@@ -1,16 +1,37 @@
-<ion-header [translucent]="true">
+<!-- <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>morir</ion-title>
     <ion-buttons slot="end">
       <ion-button color="danger" fill="solid" shape="round" (click)="logout()">Salir</ion-button>
     </ion-buttons>
   </ion-toolbar>
-</ion-header>
+</ion-header> -->
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">morir</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="login-page dark-page" [fullscreen]="true" forceOverscroll="false">
+
+  <!-- Figuras que caen (estilo login, pero versión oscura) -->
+  <div class="falling-area" aria-hidden="true">
+    <div class="drop d1"></div>
+    <div class="drop d2"></div>
+    <div class="drop d3"></div>
+    <div class="drop d4"></div>
+    <div class="drop d5"></div>
+  </div>
+
+  <div class="center-wrap">
+    <div class="card">
+      <h1 class="page-title">Tu bebé ha muerto</h1>
+      <p class="subtitle">Lamentablemente, el bebé no sobrevivió porque no se completaron las tareas necesarias para su cuidado.</p>
+
+      <div class="message-block">
+        <p>Entendemos que esto puede ser difícil. Este mensaje indica que las actividades de cuidado no se realizaron en el tiempo requerido.</p>
+      </div>
+
+      <div class="actions">
+        <ion-button expand="block" routerLink="/login" class="enter-btn">Volver al inicio</ion-button>
+      </div>
+
+    </div>
+  </div>
+
 </ion-content>
