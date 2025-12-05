@@ -13,34 +13,58 @@
 </ion-content> -->
 
 <ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Registro</ion-title>
+  <ion-toolbar>
+      <ion-buttons slot="start">
+      <ion-button routerLink="/login" aria-label="Volver a login">
+        <ion-icon [icon]="arrowBackIcon"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title class="sr-only">Registro</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
+<ion-content class="login-page">
 
-  <form (ngSubmit)="registrar()">
+  <!-- Fondo con figuras que caen (reusa clases del login) -->
+  <div class="falling-area" aria-hidden="true">
+    <div class="drop d1"></div>
+    <div class="drop d2"></div>
+    <div class="drop d3"></div>
+    <div class="drop d4"></div>
+    <div class="drop d5"></div>
+  </div>
 
-    <ion-item>
-      <ion-label position="floating">Nombre completo</ion-label>
-      <ion-input [(ngModel)]="nombre" name="nombre"></ion-input>
-    </ion-item>
+  <div class="center-wrap">
+    <div class="card">
+      <h1 class="page-title">Registro</h1>
+      <p class="subtitle">Ingresa tus datos para crear una cuenta</p>
 
-    <ion-item>
-      <ion-label position="floating">Edad</ion-label>
-      <ion-input type="number" [(ngModel)]="edad" name="edad"></ion-input>
-    </ion-item>
+      <form (ngSubmit)="registrar()" class="form-block">
+        <ion-item class="curp-item">
+          <ion-label position="floating">Nombre completo</ion-label>
+          <ion-input class="curp-input" [(ngModel)]="nombre" name="nombre"></ion-input>
+        </ion-item>
 
-    <ion-item>
-      <ion-label position="floating">CURP</ion-label>
-      <ion-input maxlength="18" [(ngModel)]="curp" name="curp"></ion-input>
-    </ion-item>
+        <ion-item class="curp-item">
+          <ion-label position="floating">Edad</ion-label>
+          <ion-input class="curp-input" type="number" [(ngModel)]="edad" name="edad"
+            (keydown)="onNumberKey($event)" (paste)="onPasteNumber($event)">
+          </ion-input>
+        </ion-item>
 
-    <ion-button expand="block" type="submit" class="ion-margin-top">
-      Registrar
-    </ion-button>
+        <ion-item class="curp-item">
+          <ion-label position="floating">CURP</ion-label>
+          <ion-input class="curp-input" maxlength="18" [(ngModel)]="curp" name="curp"></ion-input>
+        </ion-item>
 
-  </form>
+        <div class="actions">
+          <ion-button expand="block" type="submit" class="enter-btn">Registrar</ion-button>
+          <ion-button expand="block" fill="clear" routerLink="/login" class="register-btn">Cancelar</ion-button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="autoria">Nayeli</div>
 
 </ion-content>

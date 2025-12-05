@@ -1,0 +1,21 @@
+/* Reuse the same visual style as login: import login styles so both pages stay consistent */
+@import "../login/login.page.scss";
+
+/* Page-specific overrides (if needed) */
+.page-title { margin-top: 2px; }
+.subtitle { margin-bottom: 8px; }
+
+/* Ensure header back button contrasts on top of gradient */
+ion-header ion-button{ color: #7c4dff; }
+
+/* Force labels and icons to be visible on top of gradient */
+ion-label { color: #2a5e3b !important; opacity: 1 !important; }
+/* Floating label specifics (Ionic renders different markup on platforms) */
+ion-item .label { color: #2a5e3b !important; }
+ion-item .item-label { color: #2a5e3b !important; }
+
+/* Make header icon visible and slightly larger */
+ion-header ion-button ion-icon { color: #7c4dff !important; font-size: 1.25rem !important; }
+
+/* In case icons are slotted as svg, force fill/stroke */
+ion-icon { color: inherit !important; stroke: none !important; fill: currentColor !important; }

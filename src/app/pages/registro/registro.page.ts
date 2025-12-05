@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { arrowBackOutline } from 'ionicons/icons';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -12,7 +14,7 @@ import { environment } from 'src/environments/environment';
   templateUrl: './registro.page.html',
   styleUrls: ['./registro.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, RouterModule]
 })
 export class RegistroPage implements OnInit {
 
@@ -24,6 +26,9 @@ export class RegistroPage implements OnInit {
   private API_URL = environment.API_URL;
 
   constructor(private http: HttpClient, private router: Router) {}
+
+  // Expose the icon data to the template to avoid runtime asset URL resolution
+  arrowBackIcon = arrowBackOutline;
 
   ngOnInit() {}
 
@@ -51,5 +56,27 @@ export class RegistroPage implements OnInit {
           alert('Error al registrar. CURP ya existente o datos inválidos');
         }
       });
+  }
+
+  // Prevent entering '-' or scientific notation etc. Allow only digits in the age field
+  onNumberKey(event: KeyboardEvent) {
+    const forbidden = ['-', '+', 'e', 'E'];
+    if (forbidden.includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
+  // Sanitize pasted content into the edad field: keep digits only
+  onPasteNumber(event: ClipboardEvent) {
+    const text = event.clipboardData?.getData('text') || '';
+    const digits = text.replace(/\D+/g, '');
+    if (!digits) {
+      // If no digits, prevent the paste entirely
+      event.preventDefault();
+      this.edad = null;
+    } else {
+      event.preventDefault();
+      this.edad = Number(digits);
+    }
   }
 }
