@@ -27,10 +27,11 @@ export class DormirPage implements OnInit {
   // Inline overlay state (replaces Popover)
   showInfo = false;
   infoSteps: string[] = [
-    'Paso 1: Coloca la cobija suavemente sobre el bebé.',
-    'Paso 2: Ofrece el chupón para calmarlo si lo necesita.',
+    'Paso 1: Da clic al bebe.',
+    'Paso 1: Pon la cobija sobre el bebé.',
+    'Paso 2: Dale su chupón para calmarlo.',
     'Paso 3: Apaga la luz para crear un ambiente tranquilo.',
-    'Paso 4: Arrulla con movimientos suaves hasta que duerma.'
+    'Paso 4: Arrulla (Da clic al bebé) con movimientos suaves hasta que duerma.'
   ];
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }

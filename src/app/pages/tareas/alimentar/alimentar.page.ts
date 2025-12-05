@@ -52,10 +52,9 @@ export class AlimentarPage implements OnInit {
   // Inline overlay state (replaces Popover)
   showInfo = false;
   infoSteps: string[] = [
-    'Paso 1: Sostén el biberón de forma segura.',
-    'Paso 2: Asegúrate que la temperatura sea tibia.',
-    'Paso 3: Alimenta con calma y observa la reacción del bebé.',
-    'Paso 4: Limpia y guarda los utensilios después de usar.'
+    'Paso 1: Dale su biberon.',
+    'Paso 2: Dale su Gerber.',
+    'Paso 3: Dale mas comida hasta que se llene'
   ];
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
