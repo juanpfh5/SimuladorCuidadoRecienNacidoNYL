@@ -20,6 +20,11 @@
 <ion-content (pointermove)="moveDrag($event)" (pointerup)="endDrag($event)" (pointercancel)="endDrag($event)">
 
   <!-- Barra de progreso -->
+  <!-- DEBUG: mostrar actividadId y botón para forzar POST -->
+  <div class="debug-panel" style="padding:8px; text-align:center;">
+    <div style="margin-bottom:6px; font-size:0.9rem; color:#333;">ActividadId: <strong>{{ actividadId || '---' }}</strong></div>
+    <ion-button size="small" color="secondary" (click)="completarActividad()">Enviar POST de prueba</ion-button>
+  </div>
   <div class="progress-container">
     <div class="progress-bar" [style.width.%]="progress"></div>
   </div>

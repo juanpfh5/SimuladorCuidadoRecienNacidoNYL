@@ -1,8 +1,11 @@
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
 import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActividadInfoComponent } from './actividad-info.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-panal',
@@ -11,7 +14,7 @@ import { ActividadInfoComponent } from './actividad-info.component';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule]
 })
-export class PanalPage {
+export class PanalPage implements OnInit {
 
   progress = 0;
   completed = false;
@@ -27,7 +30,20 @@ export class PanalPage {
   offsetX = 0;
   offsetY = 0;
 
-  constructor(private popoverCtrl: PopoverController) { }
+  // actividadId (opcional) tomada de query param: ?actividadId=123
+  actividadId: number | null = null;
+  private actividadCompletedPosted = false;
+
+  constructor(private popoverCtrl: PopoverController, private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.queryParamMap.get('actividadId');
+    if (idParam) {
+      const n = Number(idParam);
+      if (!Number.isNaN(n)) this.actividadId = n;
+    }
+    console.log('[Panal] ngOnInit actividadId=', this.actividadId);
+  }
 
   async openInfo(ev: Event) {
     const pop = await this.popoverCtrl.create({
@@ -159,6 +175,8 @@ export class PanalPage {
       this.step = 4;
       this.incrementProgress();
       this.completed = true;
+      // notify backend that actividad completed
+      this.completarActividad();
     } else {
       // incorrect order: do nothing
       console.debug('[PanalPage] drop ignored - incorrect order or step', this.step, name);
@@ -168,6 +186,41 @@ export class PanalPage {
   incrementProgress() {
     // 4 steps to complete (baby click + 3 drags) => 25% each
     this.progress = Math.min(100, this.progress + 25);
+  }
+
+  // made public for debug/manual trigger from template
+  public async completarActividad() {
+    if (this.actividadCompletedPosted) return;
+    if (!this.actividadId) {
+      console.warn('[Panal] No actividadId disponible; no se enviará la petición de completar.');
+      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      return;
+    }
+
+    const url = `${environment.API_URL}/actividades/completar`;
+    const payload = { id: this.actividadId };
+    try {
+      console.log('[Panal] POST ->', url, payload);
+      try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
+      const res: any = await this.http.post(url, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        observe: 'response' as 'response'
+      }).toPromise();
+
+      console.log('[Panal] completarActividad HTTP status:', res?.status, 'body:', res?.body);
+      try { window.alert('Respuesta servidor: ' + (res?.status || 'n/a') + ' ' + JSON.stringify(res?.body)); } catch(e){}
+      if (res && res.status >= 200 && res.status < 300) {
+        this.actividadCompletedPosted = true;
+        try {
+          this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
+        } catch(e) { console.warn('[Panal] Navigation/reload failed', e); }
+      } else {
+        console.warn('[Panal] completarActividad no devolvió 2xx', res);
+      }
+    } catch (err) {
+      console.error('[Panal] Error al marcar actividad como completada', err);
+      try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
+    }
   }
 }
 // import { Component, OnInit } from '@angular/core';

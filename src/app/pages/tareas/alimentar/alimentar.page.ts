@@ -19,11 +19,14 @@ export class AlimentarPage implements OnInit {
 
 } */
 
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
 import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActividadInfoComponent } from './actividad-info.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-alimentar',
@@ -32,7 +35,7 @@ import { ActividadInfoComponent } from './actividad-info.component';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule]
 })
-export class AlimentarPage {
+export class AlimentarPage implements OnInit {
 
   progress = 0;
 
@@ -43,7 +46,11 @@ export class AlimentarPage {
   offsetX = 0;
   offsetY = 0;
 
-  constructor(private popoverCtrl: PopoverController) { }
+  // actividadId (opcional) tomada de query param: ?actividadId=123
+  actividadId: number | null = null;
+  private actividadCompletedPosted = false;
+
+  constructor(private popoverCtrl: PopoverController, private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
 
   ngAfterViewInit() {
     // Guardar posiciones iniciales relativas al contenedor (.food-items)
@@ -74,6 +81,15 @@ export class AlimentarPage {
       backdropDismiss: true
     });
     await pop.present();
+  }
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.queryParamMap.get('actividadId');
+    if (idParam) {
+      const n = Number(idParam);
+      if (!Number.isNaN(n)) this.actividadId = n;
+    }
+    console.log('[Alimentar] ngOnInit actividadId=', this.actividadId);
   }
 
   startDrag(event: any, item: EventTarget | null) {
@@ -157,6 +173,52 @@ export class AlimentarPage {
   feedBaby() {
     if (this.progress < 100) {
       this.progress += 20;
+      console.log('[Alimentar] progress ->', this.progress, 'actividadId=', this.actividadId);
+      // show a visible notice in case console isn't visible on device
+      try { window.dispatchEvent(new CustomEvent('app-log', { detail: { msg: '[Alimentar] progress ->' + this.progress } })); } catch(e){}
+      if (this.progress >= 100) {
+        this.progress = 100;
+        // enviar al backend que la actividad se completó (si tenemos id)
+        this.completarActividad();
+      }
+    }
+  }
+
+  // made public for debug/manual trigger from template
+  public async completarActividad() {
+    if (this.actividadCompletedPosted) return;
+    if (!this.actividadId) {
+      console.warn('[Alimentar] No actividadId disponible; no se enviará la petición de completar.');
+      // inform the user visibly
+      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      return;
+    }
+
+    const url = `${environment.API_URL}/actividades/completar`;
+    const payload = { id: this.actividadId };
+    try {
+      console.log('[Alimentar] POST ->', url, payload);
+      try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
+      // Enviar con headers explícitos y observar la respuesta para depuración
+      const res: any = await this.http.post(url, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        observe: 'response' as 'response'
+      }).toPromise();
+
+      console.log('[Alimentar] completarActividad HTTP status:', res?.status, 'body:', res?.body);
+      try { window.alert('Respuesta servidor: ' + (res?.status || 'n/a') + ' ' + JSON.stringify(res?.body)); } catch(e){}
+      if (res && res.status >= 200 && res.status < 300) {
+        this.actividadCompletedPosted = true;
+        // navigate back to home and reload so Home refreshes activity buttons
+        try {
+          this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
+        } catch(e) { console.warn('[Alimentar] Navigation/reload failed', e); }
+      } else {
+        console.warn('[Alimentar] completarActividad no devolvió 2xx', res);
+      }
+    } catch (err) {
+      console.error('[Alimentar] Error al marcar actividad como completada', err);
+      try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
     }
   }
 }

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Auth } from '../services/auth';
 import { environment } from 'src/environments/environment';
+import { Router } from '@angular/router';
 
 // PDF libs (install with npm): jspdf and jspdf-autotable
 import jsPDF from 'jspdf';
@@ -21,9 +22,9 @@ import autoTable from 'jspdf-autotable';
     </ion-toolbar>
   </ion-header>
 
-  <ion-content>
+    <ion-content>
     <ion-list *ngIf="actividades && actividades.length > 0">
-      <ion-item *ngFor="let a of actividades">
+      <ion-item button detail lines="full" *ngFor="let a of actividades" (click)="openActividad(a)">
         <ion-label>
           <div class="actividad-title">{{ a.actividad }}</div>
           <div class="actividad-date">{{ a.fecha_inicial | date:'short' }}
@@ -56,10 +57,35 @@ import autoTable from 'jspdf-autotable';
 export class ActividadesModalComponent {
   @Input() actividades: any[] = [];
 
-  constructor(private modalCtrl: ModalController, private http: HttpClient, private auth: Auth, private toastCtrl: ToastController) {}
+  constructor(
+    private modalCtrl: ModalController,
+    private http: HttpClient,
+    private auth: Auth,
+    private toastCtrl: ToastController,
+    private router: Router
+  ) {}
 
   close() {
     this.modalCtrl.dismiss();
+  }
+
+  async openActividad(a: any) {
+    // Dismiss modal first, then navegar a la página de la tarea con el id en query params
+    await this.modalCtrl.dismiss();
+
+    const nombre = (a.actividad || '').toLowerCase();
+    let ruta = '/home';
+    if (nombre.includes('aliment')) ruta = '/tareas/alimentar';
+    else if (nombre.includes('bañ') || nombre.includes('banar')) ruta = '/tareas/banar';
+    else if (nombre.includes('dorm')) ruta = '/tareas/dormir';
+    else if (nombre.includes('curar') || nombre.includes('medic')) ruta = '/tareas/medicina';
+    else if (nombre.includes('pañal') || nombre.includes('panal')) ruta = '/tareas/panal';
+
+    try {
+      await this.router.navigate([ruta], { queryParams: { actividadId: a.id } });
+    } catch (err) {
+      console.error('[ActividadesModal] Error navegando a tarea', err);
+    }
   }
 
   async generateReport() {

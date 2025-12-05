@@ -1,8 +1,11 @@
-import { Component, ElementRef, QueryList, ViewChildren } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
 import { IonicModule, PopoverController } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActividadInfoComponent } from './actividad-info.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-medicina',
@@ -11,7 +14,7 @@ import { ActividadInfoComponent } from './actividad-info.component';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule]
 })
-export class MedicinaPage {
+export class MedicinaPage implements OnInit {
   // Progress and state
   progress = 0;
   completed = false;
@@ -29,7 +32,19 @@ export class MedicinaPage {
   offsetX = 0;
   offsetY = 0;
 
-  constructor(private popoverCtrl: PopoverController) { }
+  actividadId: number | null = null;
+  private actividadCompletedPosted = false;
+
+  constructor(private popoverCtrl: PopoverController, private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+
+  ngOnInit(): void {
+    const idParam = this.route.snapshot.queryParamMap.get('actividadId');
+    if (idParam) {
+      const n = Number(idParam);
+      if (!Number.isNaN(n)) this.actividadId = n;
+    }
+    console.log('[Medicina] ngOnInit actividadId=', this.actividadId);
+  }
 
   async openInfo(ev: Event) {
     const pop = await this.popoverCtrl.create({
@@ -146,6 +161,8 @@ export class MedicinaPage {
       this.babyImage = 'assets/imgs/medicina/Bebe.png';
       this.incrementProgress(true);
       this.completed = true;
+      // notify backend that actividad completed
+      this.completarActividad();
     } else {
       console.debug('[MedicinaPage] drop ignored - incorrect order', this.step, name);
     }
@@ -158,5 +175,40 @@ export class MedicinaPage {
     }
     // three steps total -> distribute roughly equally
     this.progress = Math.min(100, this.progress + 33);
+  }
+
+  // made public for debug/manual trigger from template
+  public async completarActividad() {
+    if (this.actividadCompletedPosted) return;
+    if (!this.actividadId) {
+      console.warn('[Medicina] No actividadId disponible; no se enviará la petición de completar.');
+      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      return;
+    }
+
+    const url = `${environment.API_URL}/actividades/completar`;
+    const payload = { id: this.actividadId };
+    try {
+      console.log('[Medicina] POST ->', url, payload);
+      try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
+      const res: any = await this.http.post(url, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        observe: 'response' as 'response'
+      }).toPromise();
+
+      console.log('[Medicina] completarActividad HTTP status:', res?.status, 'body:', res?.body);
+      try { window.alert('Respuesta servidor: ' + (res?.status || 'n/a') + ' ' + JSON.stringify(res?.body)); } catch(e){}
+      if (res && res.status >= 200 && res.status < 300) {
+        this.actividadCompletedPosted = true;
+        try {
+          this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
+        } catch(e) { console.warn('[Medicina] Navigation/reload failed', e); }
+      } else {
+        console.warn('[Medicina] completarActividad no devolvió 2xx', res);
+      }
+    } catch (err) {
+      console.error('[Medicina] Error al marcar actividad como completada', err);
+      try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
+    }
   }
 }
