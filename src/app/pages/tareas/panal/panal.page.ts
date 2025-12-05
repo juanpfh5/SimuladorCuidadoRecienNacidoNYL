@@ -201,14 +201,14 @@ export class PanalPage implements OnInit {
     const payload = { id: this.actividadId };
     try {
       console.log('[Panal] POST ->', url, payload);
-      try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
+      //try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
       const res: any = await this.http.post(url, payload, {
         headers: { 'Content-Type': 'application/json' },
         observe: 'response' as 'response'
       }).toPromise();
 
       console.log('[Panal] completarActividad HTTP status:', res?.status, 'body:', res?.body);
-      try { window.alert('Respuesta servidor: ' + (res?.status || 'n/a') + ' ' + JSON.stringify(res?.body)); } catch(e){}
+      try { window.alert('Tarea completada con exito'); } catch(e){}
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
         try {

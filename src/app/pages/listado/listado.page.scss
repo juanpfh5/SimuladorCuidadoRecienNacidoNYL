@@ -1,78 +1,78 @@
 
-/* Reuse Login styles for consistent look */
-@import "../login/login.page.scss";
+// /* Reuse Login styles for consistent look */
+// @import "../login/login.page.scss";
 
-.list-wrap {
-	width: 100%;
-	max-width: 700px;
-	margin: 16px auto;
-	padding: 8px;
-}
+// .list-wrap {
+// 	width: 100%;
+// 	max-width: 700px;
+// 	margin: 16px auto;
+// 	padding: 8px;
+// }
 
-/* Apply the same layout/background used by login, but for listado page */
-ion-content.listado-page{
-	--background: none;
-	background: linear-gradient(120deg, #ffd3e0 0%, #ffecd2 25%, #d6ecff 55%, #f0e0ff 100%);
-	background-size: 200% 200%;
-	animation: gradientShift 9s ease-in-out infinite;
-	position: relative;
-	min-height: 100vh;
-	display:flex;
-	align-items:flex-start;
-	justify-content:flex-start;
-	padding: 14px 12px 64px;
-	font-family: 'Poppins', 'Segoe UI', sans-serif;
-	overflow: hidden;
-}
+// /* Apply the same layout/background used by login, but for listado page */
+// ion-content.listado-page{
+// 	--background: none;
+// 	background: linear-gradient(120deg, #ffd3e0 0%, #ffecd2 25%, #d6ecff 55%, #f0e0ff 100%);
+// 	background-size: 200% 200%;
+// 	animation: gradientShift 9s ease-in-out infinite;
+// 	position: relative;
+// 	min-height: 100vh;
+// 	display:flex;
+// 	align-items:flex-start;
+// 	justify-content:flex-start;
+// 	padding: 14px 12px 64px;
+// 	font-family: 'Poppins', 'Segoe UI', sans-serif;
+// 	overflow: hidden;
+// }
 
-/* ensure the falling shapes sit behind content and the list sits above them */
-.falling-area{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
-.list-wrap{ position: relative; z-index: 1001; }
+// /* ensure the falling shapes sit behind content and the list sits above them */
+// .falling-area{ position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
+// .list-wrap{ position: relative; z-index: 1001; }
 
-/* Ensure the page background and text colors are light/dark respectively
-   to avoid inheriting a dark theme from global styles */
-.listado-page {
-  background: linear-gradient(#f6fbff, #fffef7);
-  color: #1f2933; /* dark text for readability */
-  min-height: 100%;
-}
+// /* Ensure the page background and text colors are light/dark respectively
+//    to avoid inheriting a dark theme from global styles */
+// .listado-page {
+//   background: linear-gradient(#f6fbff, #fffef7);
+//   color: #1f2933; /* dark text for readability */
+//   min-height: 100%;
+// }
 
-.activity-card {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 12px 14px;
-	border-radius: 12px;
-	background: #ffffff;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-	margin-bottom: 10px;
-	cursor: pointer;
-	transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
-}
+// .activity-card {
+// 	display: flex;
+// 	align-items: center;
+// 	justify-content: space-between;
+// 	padding: 12px 14px;
+// 	border-radius: 12px;
+// 	background: #ffffff;
+// 	box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+// 	margin-bottom: 10px;
+// 	cursor: pointer;
+// 	transition: transform 120ms ease, box-shadow 120ms ease, background 200ms ease;
+// }
 
-.activity-card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
+// .activity-card:hover { transform: translateY(-3px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
 
-.activity-card .actividad-info { text-align: left; }
-.actividad-title { font-weight: 700; font-size: 1rem; color: #17324a; }
-.actividad-date { font-size: 0.82rem; color: #5b6b76; margin-top: 6px; }
+// .activity-card .actividad-info { text-align: left; }
+// .actividad-title { font-weight: 700; font-size: 1rem; color: #17324a; }
+// .actividad-date { font-size: 0.82rem; color: #5b6b76; margin-top: 6px; }
 
-.actividad-status ion-icon { font-size: 1.4rem; }
+// .actividad-status ion-icon { font-size: 1.4rem; }
 
-.activity-card.completed {
-	background: linear-gradient(180deg, #e6ffed, #d7fcd9);
-	border: 1px solid #7cd67c;
-	color: #11421a;
-}
+// .activity-card.completed {
+// 	background: linear-gradient(180deg, #e6ffed, #d7fcd9);
+// 	border: 1px solid #7cd67c;
+// 	color: #11421a;
+// }
 
-.empty { text-align: center; margin-top: 20px; color: #666; }
+// .empty { text-align: center; margin-top: 20px; color: #666; }
 
-.sep { margin: 0 6px; color: #999; }
+// .sep { margin: 0 6px; color: #999; }
 
-/* Make footer button sit above bottom safely */
-/* Keep the footer fixed at the bottom and style the button like Login's enter-btn */
-.fixed-footer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1004; --ion-toolbar-background: transparent; padding: 8px; }
+// /* Make footer button sit above bottom safely */
+// /* Keep the footer fixed at the bottom and style the button like Login's enter-btn */
+// .fixed-footer { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1004; --ion-toolbar-background: transparent; padding: 8px; }
 
-/* give the list room so content isn't hidden behind the fixed footer */
-.list-wrap { padding-bottom: 88px; }
+// /* give the list room so content isn't hidden behind the fixed footer */
+// .list-wrap { padding-bottom: 88px; }
 
-ion-button.enter-btn{ --background: linear-gradient(90deg,#ff6a88,#ffb86b,#7c4dff); color:#fff; border-radius:12px; font-weight:800; }
+// ion-button.enter-btn{ --background: linear-gradient(90deg,#ff6a88,#ffb86b,#7c4dff); color:#fff; border-radius:12px; font-weight:800; }

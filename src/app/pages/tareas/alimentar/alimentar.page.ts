@@ -198,7 +198,7 @@ export class AlimentarPage implements OnInit {
     const payload = { id: this.actividadId };
     try {
       console.log('[Alimentar] POST ->', url, payload);
-      try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
+      //try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
       // Enviar con headers explícitos y observar la respuesta para depuración
       const res: any = await this.http.post(url, payload, {
         headers: { 'Content-Type': 'application/json' },
@@ -206,7 +206,7 @@ export class AlimentarPage implements OnInit {
       }).toPromise();
 
       console.log('[Alimentar] completarActividad HTTP status:', res?.status, 'body:', res?.body);
-      try { window.alert('Respuesta servidor: ' + (res?.status || 'n/a') + ' ' + JSON.stringify(res?.body)); } catch(e){}
+      try { window.alert('Tarea completada con exito'); } catch(e){}
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
         // navigate back to home and reload so Home refreshes activity buttons

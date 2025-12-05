@@ -232,7 +232,7 @@ export class DormirPage implements OnInit {
     if (this.actividadCompletedPosted) return;
     if (!this.actividadId) {
       console.warn('[Dormir] No actividadId disponible; no se enviará la petición de completar.');
-      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch (e) { }
       return;
     }
 
@@ -240,25 +240,25 @@ export class DormirPage implements OnInit {
     const payload = { id: this.actividadId };
     try {
       console.log('[Dormir] POST ->', url, payload);
-      try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch(e){}
+      //try { window.alert('Enviando petición de completar actividad ' + this.actividadId); } catch (e) { }
       const res: any = await this.http.post(url, payload, {
         headers: { 'Content-Type': 'application/json' },
         observe: 'response' as 'response'
       }).toPromise();
 
       console.log('[Dormir] completarActividad HTTP status:', res?.status, 'body:', res?.body);
-      try { window.alert('Respuesta servidor: ' + (res?.status || 'n/a') + ' ' + JSON.stringify(res?.body)); } catch(e){}
+      try { window.alert('Tarea completada con exito'); } catch (e) { }
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
         try {
-          this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
-        } catch(e) { console.warn('[Dormir] Navigation/reload failed', e); }
+          this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch (e) { } });
+        } catch (e) { console.warn('[Dormir] Navigation/reload failed', e); }
       } else {
         console.warn('[Dormir] completarActividad no devolvió 2xx', res);
       }
     } catch (err) {
       console.error('[Dormir] Error al marcar actividad como completada', err);
-      try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
+      try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch (e) { }
     }
   }
 }

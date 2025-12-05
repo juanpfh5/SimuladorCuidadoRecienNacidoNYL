@@ -1,15 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { HttpClient } from '@angular/common/http';
 import { Auth } from 'src/app/services/auth';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
-import { ToastController } from '@ionic/angular';
-import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
-import { Share } from '@capacitor/share';
 
-// PDF libs (ensure installed): jspdf and jspdf-autotable
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -30,16 +31,17 @@ interface Actividad {
   imports: [IonicModule, CommonModule]
 })
 export class ListadoPage implements OnInit {
-  actividades: Actividad[] = [];
 
+  actividades: Actividad[] = [];
   private API_URL = environment.API_URL;
 
   constructor(
     private http: HttpClient,
     private auth: Auth,
     private router: Router,
-    private toastCtrl: ToastController
-  ) { }
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
+  ) {}
 
   goBack() {
     this.router.navigate(['/home']);
@@ -50,7 +52,6 @@ export class ListadoPage implements OnInit {
   }
 
   async ionViewWillEnter() {
-    // refresh each time the page becomes active
     await this.loadActividades();
   }
 
@@ -63,6 +64,7 @@ export class ListadoPage implements OnInit {
     }
 
     const url = `${this.API_URL}/actividades/dia/${curp}`;
+
     try {
       const res: any = await this.http.get(url).toPromise();
       this.actividades = res?.actividades || [];
@@ -76,21 +78,19 @@ export class ListadoPage implements OnInit {
   async openActividad(a: Actividad) {
     const nombre = (a.actividad || '').toLowerCase();
     let ruta = '/home';
+
     if (nombre.includes('aliment')) ruta = '/tareas/alimentar';
     else if (nombre.includes('bañ') || nombre.includes('banar')) ruta = '/tareas/banar';
     else if (nombre.includes('dorm')) ruta = '/tareas/dormir';
     else if (nombre.includes('curar') || nombre.includes('medic')) ruta = '/tareas/medicina';
     else if (nombre.includes('pañal') || nombre.includes('panal')) ruta = '/tareas/panal';
 
-    try {
-      await this.router.navigate([ruta], { queryParams: { actividadId: a.id } });
-    } catch (err) {
-      console.error('[Listado] Error navegando a tarea', err);
-    }
+    await this.router.navigate([ruta], { queryParams: { actividadId: a.id } });
   }
 
   async generateReport() {
     const curp = this.auth.getCurp();
+
     if (!curp) {
       const t = await this.toastCtrl.create({ message: 'CURP no encontrada', duration: 2000 });
       await t.present();
@@ -98,16 +98,18 @@ export class ListadoPage implements OnInit {
     }
 
     const url = `${this.API_URL}/actividades/reporte/${curp}`;
+
     try {
       const res: any = await this.http.get(url).toPromise();
       const actividades = res?.actividades || [];
+
       if (!actividades.length) {
         const t = await this.toastCtrl.create({ message: 'No hay actividades para generar reporte', duration: 2000 });
         await t.present();
         return;
       }
 
-      this.createPdf(actividades, curp);
+      await this.createPdf(actividades, curp);
     } catch (err) {
       console.error('Error fetching report data', err);
       const t = await this.toastCtrl.create({ message: 'Error al obtener reporte', duration: 2500 });
@@ -115,90 +117,99 @@ export class ListadoPage implements OnInit {
     }
   }
 
-  // createPdf(actividades: any[], curp: string) {
-  //   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-  //   const title = 'Reporte de actividades';
-  //   const dateStr = new Date().toLocaleString();
-  //   doc.setFontSize(18);
-  //   doc.text(title, 40, 50);
-  //   doc.setFontSize(10);
-  //   doc.text(`Usuario: ${curp}`, 40, 70);
-  //   doc.text(`Generado: ${dateStr}`, 40, 85);
-
-  //   const body = actividades.map(a => [
-  //     a.actividad,
-  //     this.formatDate(a.fecha_inicial),
-  //     this.formatDate(a.fecha_limite),
-  //     a.completada ? 'Sí' : 'No',
-  //     a.curp || ''
-  //   ]);
-
-  //   autoTable(doc as any, {
-  //     startY: 110,
-  //     head: [['Actividad', 'Fecha inicial', 'Fecha límite', 'Completada', 'CURP']],
-  //     body,
-  //     styles: { fontSize: 10 },
-  //     headStyles: { fillColor: [60, 141, 188] }
-  //   });
-
-  //   const fileName = `reporte_actividades_${curp}_${(new Date()).toISOString().slice(0,10)}.pdf`;
-  //   doc.save(fileName);
-  // }
-
   async createPdf(actividades: any[], curp: string) {
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
 
-    const title = 'Reporte de actividades';
-    const dateStr = new Date().toLocaleString();
-
     doc.setFontSize(18);
-    doc.text(title, 40, 50);
+    doc.text('Reporte de actividades', 40, 50);
+
     doc.setFontSize(10);
     doc.text(`Usuario: ${curp}`, 40, 70);
-    doc.text(`Generado: ${dateStr}`, 40, 85);
-
-    const body = actividades.map(a => [
-      a.actividad,
-      this.formatDate(a.fecha_inicial),
-      this.formatDate(a.fecha_limite),
-      a.completada ? 'Sí' : 'No',
-      a.curp || ''
-    ]);
+    doc.text(`Generado: ${new Date().toLocaleString()}`, 40, 85);
 
     autoTable(doc as any, {
       startY: 110,
       head: [['Actividad', 'Fecha inicial', 'Fecha límite', 'Completada', 'CURP']],
-      body,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [60, 141, 188] }
+      body: actividades.map(a => [
+        a.actividad,
+        this.formatDate(a.fecha_inicial),
+        this.formatDate(a.fecha_limite),
+        a.completada ? 'Sí' : 'No',
+        a.curp || ''
+      ])
     });
 
-    // Generar PDF en base64
-    const pdfOutput = doc.output('datauristring');
-    const base64Pdf = pdfOutput.split(',')[1];
+    const pdfBase64 = doc.output('datauristring').split(',')[1];
 
     const fileName = `reporte_${curp}_${new Date().toISOString().slice(0, 10)}.pdf`;
 
-    // Guardar archivo en el sistema
-    await Filesystem.writeFile({
+    await Filesystem.requestPermissions();
+
+    const saved = await Filesystem.writeFile({
       path: fileName,
-      data: base64Pdf,
+      data: pdfBase64,
       directory: Directory.Documents
     });
 
-    // EXTRA: Abrir el PDF directamente en visor nativo
-    const uriResult = await Filesystem.getUri({
+    const fileUri = (await Filesystem.getUri({
       directory: Directory.Documents,
-      path: fileName,
+      path: fileName
+    })).uri;
+
+    console.log('PDF guardado en:', fileUri);
+
+    // === ALERTA EMERGENTE ===
+    const alert = await this.alertCtrl.create({
+      header: 'Éxito',
+      message: 'PDF generado con éxito.',
+      buttons: [
+        {
+          text: 'Abrir PDF',
+          handler: () => this.openPdf(fileUri)
+        },
+        {
+          text: 'Aceptar',
+          role: 'cancel'
+        }
+      ]
     });
 
-    const nativeUrl = uriResult.uri;
+    await alert.present();
 
-    // Abrir el PDF con el visor nativo de Android
-    window.open(nativeUrl, '_system');
+    // Notificación local
+    try {
+      await LocalNotifications.requestPermissions();
+      await LocalNotifications.schedule({
+        notifications: [{
+          id: Math.floor(Math.random() * 99999),
+          title: 'Reporte generado',
+          body: fileName
+        }]
+      });
+    } catch (e) {
+      console.warn('Notif error', e);
+    }
+  }
+
+  async openPdf(uri: string) {
+    try {
+      await Share.share({
+        title: 'Reporte PDF',
+        url: uri,
+        text: 'Aquí está tu reporte en PDF'
+      });
+    } catch (err) {
+      console.warn('Share fallo', err);
+      try {
+        window.open(uri, '_system');
+      } catch (e) {
+        console.error('No se pudo abrir el PDF', e);
+      }
+    }
   }
 
   formatDate(val: string) {
-    try { return new Date(val).toLocaleString(); } catch (e) { return val; }
+    try { return new Date(val).toLocaleString(); }
+    catch { return val; }
   }
 }
