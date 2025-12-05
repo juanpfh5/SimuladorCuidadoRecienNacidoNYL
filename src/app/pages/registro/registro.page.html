@@ -40,22 +40,20 @@
       <p class="subtitle">Ingresa tus datos para crear una cuenta</p>
 
       <form (ngSubmit)="registrar()" class="form-block">
-        <ion-item class="curp-item">
-          <ion-label position="floating">Nombre completo</ion-label>
-          <ion-input class="curp-input" [(ngModel)]="nombre" name="nombre"></ion-input>
-        </ion-item>
+        <div class="native-item curp-item">
+          <label class="native-label" for="nombre">Nombre completo</label>
+          <input id="nombre" class="native-curp-input" type="text" placeholder="" [(ngModel)]="nombre" name="nombre" aria-label="Nombre completo">
+        </div>
 
-        <ion-item class="curp-item">
-          <ion-label position="floating">Edad</ion-label>
-          <ion-input class="curp-input" type="number" [(ngModel)]="edad" name="edad"
-            (keydown)="onNumberKey($event)" (paste)="onPasteNumber($event)">
-          </ion-input>
-        </ion-item>
+        <div class="native-item curp-item">
+          <label class="native-label" for="edad">Edad</label>
+          <input id="edad" class="native-curp-input" type="number" inputmode="numeric" placeholder="" [(ngModel)]="edad" name="edad" (keydown)="onNumberKey($event)" (paste)="onPasteNumber($event)" aria-label="Edad">
+        </div>
 
-        <ion-item class="curp-item">
-          <ion-label position="floating">CURP</ion-label>
-          <ion-input class="curp-input" maxlength="18" [(ngModel)]="curp" name="curp"></ion-input>
-        </ion-item>
+        <div class="native-item curp-item">
+          <label class="native-label" for="curp">CURP</label>
+          <input id="curp" class="native-curp-input" type="text" maxlength="18" placeholder="" [(ngModel)]="curp" name="curp" aria-label="CURP">
+        </div>
 
         <div class="actions">
           <ion-button expand="block" type="submit" class="enter-btn">Registrar</ion-button>

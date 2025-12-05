@@ -15,10 +15,11 @@
       <p class="subtitle">Ingresa tu CURP para continuar</p>
 
       <form (ngSubmit)="login()" class="form-block">
-        <ion-item class="curp-item">
-          <ion-label position="floating">CURP</ion-label>
-          <ion-input class="curp-input" type="text" [(ngModel)]="curp" name="curp" maxlength="18" required></ion-input>
-        </ion-item>
+        <!-- Native HTML input (works better on some Android WebViews) -->
+        <div class="native-item curp-item">
+          <label for="curp" class="native-label">CURP</label>
+          <input id="curp" class="native-curp-input" type="text" [(ngModel)]="curp" name="curp" maxlength="18" required />
+        </div>
 
         <div class="actions">
           <ion-button expand="block" type="submit" class="enter-btn">Entrar</ion-button>
