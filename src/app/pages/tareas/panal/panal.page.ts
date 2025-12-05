@@ -37,7 +37,7 @@ export class PanalPage implements OnInit {
   showInfo = false;
   infoSteps: string[] = [
     'Paso 1: Limpia la zona con las toallas húmedas.',
-    'Paso 2: Aplica talco si es necesario y con suavidad.',
+    'Paso 2: Aplica talco y con suavidad.',
     'Paso 3: Coloca el pañal nuevo junto al pliegue correcto.'
   ];
 

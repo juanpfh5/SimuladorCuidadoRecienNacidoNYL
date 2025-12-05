@@ -31,10 +31,11 @@ export class BanarPage implements OnInit {
   // show/hide inline info overlay (fallback for Popover on APK)
   showInfo = false;
   infoSteps: string[] = [
-    'Paso 1: Llena la tina con agua tibia.',
-    'Paso 2: Aplica shampoo suavemente en la cabecita.',
-    'Paso 3: Usa la regadera para enjuagar con cuidado.',
-    'Paso 4: Seca con la toalla y abriga al bebé.'
+    'Paso 1: Toca al bebé para meterlo a la tina.',
+    'Paso 2: Usa el shampoo con el bebé por 4 segundos.',
+    'Paso 3: Usa el jabón con el bebé por 4 segundos.',
+    'Paso 4: Enjuaga al bebé con agua por 4 segundos.',
+    'Paso 5: Seca al bebé con la toalla por 4 segundos.'
   ];
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }

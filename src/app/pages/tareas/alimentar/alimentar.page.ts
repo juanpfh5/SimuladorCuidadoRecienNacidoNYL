@@ -54,7 +54,7 @@ export class AlimentarPage implements OnInit {
   infoSteps: string[] = [
     'Paso 1: Dale su biberon.',
     'Paso 2: Dale su Gerber.',
-    'Paso 3: Dale mas comida hasta que se llene'
+    'Paso 3: Dale mas comida hasta que se llene.'
   ];
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }

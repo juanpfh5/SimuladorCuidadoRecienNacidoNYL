@@ -27,9 +27,9 @@ export class MedicinaPage implements OnInit {
   // Inline HTML info overlay (replace popover)
   showInfo = false;
   infoSteps: string[] = [
-    'Paso 1: Limpia suavemente la zona con el pañuelo.',
-    'Paso 2: Aplica la pomada con cuidado sobre la zona afectada.',
-    'Paso 3: Coloca el trapo para proteger y dejar actuar.'
+    'Paso 1: Limpia suavemente la nariz y la cara del bebé con un pañuelo.',
+    'Paso 2: Aplica con suavidad la pomada sobre la zona afectada del bebé.',
+    'Paso 3: Cubre o seca al bebé con un trapo limpio y suave.'
   ];
 
   @ViewChildren('draggable') draggableItems!: QueryList<ElementRef>;
