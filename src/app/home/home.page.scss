@@ -9,6 +9,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  /* Ensure content avoids the system status bar / notch on mobile */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
 }
 
 /* Barra superior */
@@ -18,6 +20,12 @@
   color: #fff;
   backdrop-filter: blur(6px);
   box-shadow: 0 6px 18px rgba(124,77,255,0.08);
+  /* Make sure header sits above decorative layers and is interactive in WebView/APK */
+  position: relative;
+  z-index: 1100;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  pointer-events: auto;
 }
 
 .header-title {
@@ -54,8 +62,31 @@
 }
 
 /* position falling-area under content (defined in login styles when imported elsewhere) */
-.falling-area { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.falling-area { position: absolute; inset: 0; pointer-events: none !important; overflow: hidden; z-index: 0; }
 .baby-container { position: relative; z-index: 1001; }
+
+/* Ensure the header buttons are above the falling-area and receive pointer events */
+ion-header {
+  position: relative;
+  z-index: 11110;
+  pointer-events: auto;
+}
+ 
+.header-toolbar ion-buttons {
+  position: relative;
+  z-index: 11112;
+  pointer-events: auto;
+}
+/* ensure individual header buttons accept pointer events and are promoted to their own layer */
+ion-button.act-btn, ion-button.logout-btn {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  pointer-events: auto;
+  z-index: 11115;
+}
+
+/* Ensure drops never capture pointer events even when transformed */
+.falling-area .drop { pointer-events: none !important; }
 
 /* Use the same friendly fonts as Login */
 @import "../pages/login/login.page.scss";
@@ -135,7 +166,7 @@ ion-button.act-btn, ion-button.logout-btn {
 
 /* Contenedor de los botones */
 .tasks-container {
-  margin-top: 20px;
+  margin-top: 10px;
   width: 100%;
 }
 
