@@ -22,6 +22,13 @@
 
 <body>
   <app-root></app-root>
+  <script>
+    document.addEventListener('touchstart', function (ev) {
+      if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'TEXTAREA') {
+        ev.target.focus();
+      }
+    }, true);
+  </script>
 </body>
 
 </html>

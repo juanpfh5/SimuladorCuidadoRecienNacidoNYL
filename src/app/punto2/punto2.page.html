@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  </head>
+  <body>
+    <h3>Test input</h3>
+    <input id="t" placeholder="toca aquí" style="font-size:22px; padding:12px;">
+    <script>
+      document.getElementById('t').addEventListener('focus', ()=> console.log('input focus'));
+      document.getElementById('t').addEventListener('touchstart', ()=> console.log('touchstart'));
+    </script>
+  </body>
+</html>

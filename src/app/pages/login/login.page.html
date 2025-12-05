@@ -17,19 +17,19 @@
       <form (ngSubmit)="login()" class="form-block">
         <ion-item class="curp-item">
           <ion-label position="floating">CURP</ion-label>
-          <ion-input class="curp-input"
-            type="text"
-            [(ngModel)]="curp"
-            name="curp"
-            maxlength="18"
-            required
-          ></ion-input>
+          <ion-input class="curp-input" type="text" [(ngModel)]="curp" name="curp" maxlength="18" required></ion-input>
         </ion-item>
 
         <div class="actions">
           <ion-button expand="block" type="submit" class="enter-btn">Entrar</ion-button>
           <ion-button expand="block" fill="solid" routerLink="/registro" class="register-btn">Registrarme</ion-button>
+
+          <!-- Nuevo botón para ir al punto 2 -->
+          <ion-button expand="block" fill="outline" routerLink="/punto2" class="punto2-btn">
+            Ir al Punto 2
+          </ion-button>
         </div>
+
       </form>
     </div>
   </div>
