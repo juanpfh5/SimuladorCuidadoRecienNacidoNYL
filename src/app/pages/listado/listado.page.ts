@@ -6,6 +6,8 @@ import { Auth } from 'src/app/services/auth';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 // PDF libs (ensure installed): jspdf and jspdf-autotable
 import jsPDF from 'jspdf';
@@ -37,7 +39,7 @@ export class ListadoPage implements OnInit {
     private auth: Auth,
     private router: Router,
     private toastCtrl: ToastController
-  ) {}
+  ) { }
 
   goBack() {
     this.router.navigate(['/home']);
@@ -113,10 +115,42 @@ export class ListadoPage implements OnInit {
     }
   }
 
-  createPdf(actividades: any[], curp: string) {
+  // createPdf(actividades: any[], curp: string) {
+  //   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  //   const title = 'Reporte de actividades';
+  //   const dateStr = new Date().toLocaleString();
+  //   doc.setFontSize(18);
+  //   doc.text(title, 40, 50);
+  //   doc.setFontSize(10);
+  //   doc.text(`Usuario: ${curp}`, 40, 70);
+  //   doc.text(`Generado: ${dateStr}`, 40, 85);
+
+  //   const body = actividades.map(a => [
+  //     a.actividad,
+  //     this.formatDate(a.fecha_inicial),
+  //     this.formatDate(a.fecha_limite),
+  //     a.completada ? 'Sí' : 'No',
+  //     a.curp || ''
+  //   ]);
+
+  //   autoTable(doc as any, {
+  //     startY: 110,
+  //     head: [['Actividad', 'Fecha inicial', 'Fecha límite', 'Completada', 'CURP']],
+  //     body,
+  //     styles: { fontSize: 10 },
+  //     headStyles: { fillColor: [60, 141, 188] }
+  //   });
+
+  //   const fileName = `reporte_actividades_${curp}_${(new Date()).toISOString().slice(0,10)}.pdf`;
+  //   doc.save(fileName);
+  // }
+
+  async createPdf(actividades: any[], curp: string) {
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
     const title = 'Reporte de actividades';
     const dateStr = new Date().toLocaleString();
+
     doc.setFontSize(18);
     doc.text(title, 40, 50);
     doc.setFontSize(10);
@@ -139,11 +173,32 @@ export class ListadoPage implements OnInit {
       headStyles: { fillColor: [60, 141, 188] }
     });
 
-    const fileName = `reporte_actividades_${curp}_${(new Date()).toISOString().slice(0,10)}.pdf`;
-    doc.save(fileName);
+    // Generar PDF en base64
+    const pdfOutput = doc.output('datauristring');
+    const base64Pdf = pdfOutput.split(',')[1];
+
+    const fileName = `reporte_${curp}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+    // Guardar archivo en el sistema
+    await Filesystem.writeFile({
+      path: fileName,
+      data: base64Pdf,
+      directory: Directory.Documents
+    });
+
+    // EXTRA: Abrir el PDF directamente en visor nativo
+    const uriResult = await Filesystem.getUri({
+      directory: Directory.Documents,
+      path: fileName,
+    });
+
+    const nativeUrl = uriResult.uri;
+
+    // Abrir el PDF con el visor nativo de Android
+    window.open(nativeUrl, '_system');
   }
 
   formatDate(val: string) {
-    try { return new Date(val).toLocaleString(); } catch(e) { return val; }
+    try { return new Date(val).toLocaleString(); } catch (e) { return val; }
   }
 }
