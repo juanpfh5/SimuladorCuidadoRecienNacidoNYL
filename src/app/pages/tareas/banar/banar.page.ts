@@ -1,8 +1,9 @@
-import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SoundService } from '../../../services/sound.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -28,6 +29,8 @@ export class BanarPage implements OnInit {
   // actividadId (optional) passed as query param ?actividadId=123
   actividadId: number | null = null;
   private actividadCompletedPosted = false;
+  // ensure completion sound plays only once
+  playedCompletionSound = false;
   // show/hide inline info overlay (fallback for Popover on APK)
   showInfo = false;
   infoSteps: string[] = [
@@ -38,7 +41,7 @@ export class BanarPage implements OnInit {
     'Paso 5: Seca al bebé con la toalla por 4 segundos.'
   ];
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router, private sound: SoundService) { }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.queryParamMap.get('actividadId');
@@ -47,6 +50,8 @@ export class BanarPage implements OnInit {
       if (!Number.isNaN(n)) this.actividadId = n;
     }
     console.log('[Banar] ngOnInit actividadId=', this.actividadId);
+    // start baby cry loop while user is on this activity
+    try { this.sound.playLoop('assets/sounds/LlantoBebe.mp3'); } catch(e){}
   }
 
   @ViewChildren('draggable') draggableItems!: QueryList<ElementRef>;
@@ -259,7 +264,11 @@ export class BanarPage implements OnInit {
       this.babyImage = 'assets/imgs/banar/Bebe.png';
       this.incrementProgress(true);
       this.completed = true;
-      // notify backend that actividad completed
+      // stop cry and play laugh once, then notify backend
+      if (!this.playedCompletionSound) {
+        try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch(e){}
+        this.playedCompletionSound = true;
+      }
       this.completarActividad();
     } else {
       this.incrementProgress();
@@ -313,7 +322,11 @@ export class BanarPage implements OnInit {
         this.babyImage = 'assets/imgs/banar/Bebe.png';
         this.incrementProgress(true);
         this.completed = true;
-        // notify backend that actividad completed
+        // stop crying and play laugh once, then notify backend that actividad completed
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch (e) {}
+          this.playedCompletionSound = true;
+        }
         this.completarActividad();
       } else {
         this.incrementProgress();
@@ -334,7 +347,7 @@ export class BanarPage implements OnInit {
     if (this.actividadCompletedPosted) return;
     if (!this.actividadId) {
       console.warn('[Banar] No actividadId disponible; no se enviará la petición de completar.');
-      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      try { window.alert('No fue posible registrar esta actividad como finalizada. Favor de contactar a la persona responsable en caso de que lo considere un error.'); } catch(e){}
       return;
     }
 
@@ -352,6 +365,11 @@ export class BanarPage implements OnInit {
       try { window.alert('Tarea completada con exito'); } catch(e){}
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
+        // defensive: ensure completion sound played and loop stopped if not already
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch(e){}
+          this.playedCompletionSound = true;
+        }
         try {
           this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
         } catch(e) { console.warn('[Banar] Navigation/reload failed', e); }
@@ -362,5 +380,9 @@ export class BanarPage implements OnInit {
       console.error('[Banar] Error al marcar actividad como completada', err);
       try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
     }
+  }
+
+  ngOnDestroy(): void {
+    try { this.sound.stopAll(); } catch (e) {}
   }
 }

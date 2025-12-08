@@ -1,8 +1,9 @@
-import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SoundService } from '../../../services/sound.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -13,7 +14,7 @@ import { environment } from 'src/environments/environment';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule]
 })
-export class MedicinaPage implements OnInit {
+export class MedicinaPage implements OnInit, OnDestroy {
   // Progress and state
   progress = 0;
   completed = false;
@@ -41,8 +42,10 @@ export class MedicinaPage implements OnInit {
 
   actividadId: number | null = null;
   private actividadCompletedPosted = false;
+  // ensure completion sound plays only once
+  playedCompletionSound = false;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router, private sound: SoundService) { }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.queryParamMap.get('actividadId');
@@ -51,6 +54,8 @@ export class MedicinaPage implements OnInit {
       if (!Number.isNaN(n)) this.actividadId = n;
     }
     console.log('[Medicina] ngOnInit actividadId=', this.actividadId);
+    // start looping baby cry while on activity
+    try { this.sound.playLoop('assets/sounds/LlantoBebe.mp3'); } catch (e) {}
   }
 
   // show inline overlay (works reliably in APK)
@@ -217,7 +222,11 @@ export class MedicinaPage implements OnInit {
       this.babyImage = 'assets/imgs/medicina/Bebe.png';
       this.incrementProgress(true);
       this.completed = true;
-      // notify backend that actividad completed
+      // stop crying and play laugh immediately (user action context), then notify backend
+      if (!this.playedCompletionSound) {
+        try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch (e) {}
+        this.playedCompletionSound = true;
+      }
       this.completarActividad();
     } else {
       console.debug('[MedicinaPage] drop ignored - incorrect order', this.step, name);
@@ -238,7 +247,7 @@ export class MedicinaPage implements OnInit {
     if (this.actividadCompletedPosted) return;
     if (!this.actividadId) {
       console.warn('[Medicina] No actividadId disponible; no se enviará la petición de completar.');
-      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      try { window.alert('No fue posible registrar esta actividad como finalizada. Favor de contactar a la persona responsable en caso de que lo considere un error.'); } catch(e){}
       return;
     }
 
@@ -256,6 +265,11 @@ export class MedicinaPage implements OnInit {
       try { window.alert('Tarea completada con exito'); } catch(e){}
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
+        // stop crying loop and play laugh once
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch (e) {}
+          this.playedCompletionSound = true;
+        }
         try {
           this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
         } catch(e) { console.warn('[Medicina] Navigation/reload failed', e); }
@@ -266,5 +280,9 @@ export class MedicinaPage implements OnInit {
       console.error('[Medicina] Error al marcar actividad como completada', err);
       try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
     }
+  }
+
+  ngOnDestroy(): void {
+    try { this.sound.stopAll(); } catch (e) {}
   }
 }

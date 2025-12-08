@@ -19,11 +19,12 @@ export class AlimentarPage implements OnInit {
 
 } */
 
-import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SoundService } from '../../../services/sound.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -48,6 +49,8 @@ export class AlimentarPage implements OnInit {
   // actividadId (opcional) tomada de query param: ?actividadId=123
   actividadId: number | null = null;
   private actividadCompletedPosted = false;
+  // avoid playing completion sound multiple times
+  playedCompletionSound = false;
 
   // Inline overlay state (replaces Popover)
   showInfo = false;
@@ -57,7 +60,12 @@ export class AlimentarPage implements OnInit {
     'Paso 3: Dale mas comida hasta que se llene.'
   ];
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+  constructor(
+    private route: ActivatedRoute,
+    private http: HttpClient,
+    private router: Router,
+    private sound: SoundService
+  ) { }
 
   ngAfterViewInit() {
     // Guardar posiciones iniciales relativas al contenedor (.food-items)
@@ -96,6 +104,10 @@ export class AlimentarPage implements OnInit {
       if (!Number.isNaN(n)) this.actividadId = n;
     }
     console.log('[Alimentar] ngOnInit actividadId=', this.actividadId);
+    // start baby cry loop while on this activity (until completed)
+    if (!this.progress || this.progress < 100) {
+      try { this.sound.playLoop('assets/sounds/LlantoBebe.mp3'); } catch(e){}
+    }
   }
 
   startDrag(event: any, item: EventTarget | null) {
@@ -185,6 +197,11 @@ export class AlimentarPage implements OnInit {
       if (this.progress >= 100) {
         this.progress = 100;
         // enviar al backend que la actividad se completó (si tenemos id)
+        // stop crying and play laugh immediately (try to play in the user gesture context)
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch(e){}
+          this.playedCompletionSound = true;
+        }
         this.completarActividad();
       }
     }
@@ -196,7 +213,7 @@ export class AlimentarPage implements OnInit {
     if (!this.actividadId) {
       console.warn('[Alimentar] No actividadId disponible; no se enviará la petición de completar.');
       // inform the user visibly
-      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      try { window.alert('No fue posible registrar esta actividad como finalizada. Favor de contactar a la persona responsable en caso de que lo considere un error.'); } catch(e){}
       return;
     }
 
@@ -213,6 +230,11 @@ export class AlimentarPage implements OnInit {
 
       console.log('[Alimentar] completarActividad HTTP status:', res?.status, 'body:', res?.body);
       try { window.alert('Tarea completada con exito'); } catch(e){}
+      // stop crying loop and play baby laugh once (only once)
+      if (!this.playedCompletionSound) {
+        try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch(e){}
+        this.playedCompletionSound = true;
+      }
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
         // navigate back to home and reload so Home refreshes activity buttons
@@ -226,5 +248,9 @@ export class AlimentarPage implements OnInit {
       console.error('[Alimentar] Error al marcar actividad como completada', err);
       try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
     }
+  }
+
+  ngOnDestroy(): void {
+    try { this.sound.stopAll(); } catch (e) {}
   }
 }

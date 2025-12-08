@@ -1,8 +1,9 @@
-import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SoundService } from '../../../services/sound.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -13,7 +14,7 @@ import { environment } from 'src/environments/environment';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule]
 })
-export class PanalPage implements OnInit {
+export class PanalPage implements OnInit, OnDestroy {
 
   progress = 0;
   completed = false;
@@ -32,16 +33,19 @@ export class PanalPage implements OnInit {
   // actividadId (opcional) tomada de query param: ?actividadId=123
   actividadId: number | null = null;
   private actividadCompletedPosted = false;
+  // ensure completion sound plays only once
+  playedCompletionSound = false;
 
   // Inline HTML overlay state (replace Popover)
   showInfo = false;
   infoSteps: string[] = [
-    'Paso 1: Limpia la zona con las toallas húmedas.',
-    'Paso 2: Aplica talco y con suavidad.',
-    'Paso 3: Coloca el pañal nuevo junto al pliegue correcto.'
+    'Paso 1: Toca al Bebé para quitarle el pañal sucio.',
+    'Paso 2: Limpia la zona con las toallas húmedas.',
+    'Paso 3: Aplica talco y con suavidad.',
+    'Paso 4: Coloca el pañal nuevo junto al pliegue correcto.'
   ];
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router, private sound: SoundService) { }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.queryParamMap.get('actividadId');
@@ -50,6 +54,8 @@ export class PanalPage implements OnInit {
       if (!Number.isNaN(n)) this.actividadId = n;
     }
     console.log('[Panal] ngOnInit actividadId=', this.actividadId);
+    // start looping baby cry while on activity
+    try { this.sound.playLoop('assets/sounds/LlantoBebe.mp3'); } catch (e) {}
   }
 
   async openInfo(ev: Event) {
@@ -229,8 +235,13 @@ export class PanalPage implements OnInit {
       this.step = 4;
       this.incrementProgress();
       this.completed = true;
-      // notify backend that actividad completed
-      this.completarActividad();
+        // stop crying and play laugh immediately (user action context), then notify backend
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch (e) {}
+          this.playedCompletionSound = true;
+        }
+        // notify backend that actividad completed
+        this.completarActividad();
     } else {
       // incorrect order: do nothing
       console.debug('[PanalPage] drop ignored - incorrect order or step', this.step, name);
@@ -247,7 +258,7 @@ export class PanalPage implements OnInit {
     if (this.actividadCompletedPosted) return;
     if (!this.actividadId) {
       console.warn('[Panal] No actividadId disponible; no se enviará la petición de completar.');
-      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch(e){}
+      try { window.alert('No fue posible registrar esta actividad como finalizada. Favor de contactar a la persona responsable en caso de que lo considere un error.'); } catch(e){}
       return;
     }
 
@@ -265,6 +276,11 @@ export class PanalPage implements OnInit {
       try { window.alert('Tarea completada con exito'); } catch(e){}
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
+        // stop crying loop and play laugh once
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch (e) {}
+          this.playedCompletionSound = true;
+        }
         try {
           this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch(e){} });
         } catch(e) { console.warn('[Panal] Navigation/reload failed', e); }
@@ -275,6 +291,10 @@ export class PanalPage implements OnInit {
       console.error('[Panal] Error al marcar actividad como completada', err);
       try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch(e){}
     }
+  }
+  
+  ngOnDestroy(): void {
+    try { this.sound.stopAll(); } catch (e) {}
   }
 }
 // import { Component, OnInit } from '@angular/core';

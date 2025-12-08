@@ -11,6 +11,7 @@
   justify-content: flex-start;
   /* Ensure content avoids the system status bar / notch on mobile */
   padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+  // margin-bottom: 30px;
 }
 
 /* Barra superior */
@@ -20,6 +21,14 @@
   color: #fff;
   backdrop-filter: blur(6px);
   box-shadow: 0 6px 18px rgba(124,77,255,0.08);
+  /* Layout: keep title left and buttons right on the same row */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:nowrap;
+  /* Respect safe area at top (notch) */
+  padding: calc(var(--safe-area-inset-top, env(safe-area-inset-top))) 12px 12px;
+  min-height: 56px;
   /* Make sure header sits above decorative layers and is interactive in WebView/APK */
   position: relative;
   z-index: 1100;
@@ -43,6 +52,29 @@
   background: linear-gradient(90deg, #ff8a00 0%, #d53cff 100%);
   color: #ffffff;
   font-weight: 800;
+}
+
+/* Ensure the ion-title does not force wrapping of toolbar content */
+.header-title {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 0 1 auto;
+}
+
+.header-toolbar ion-buttons {
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex: 0 0 auto;
+}
+
+/* Make header buttons compact and avoid wrapping text */
+ion-button.act-btn, ion-button.logout-btn {
+  white-space: nowrap;
 }
 
 /* Contenedor principal */
@@ -166,7 +198,7 @@ ion-button.act-btn, ion-button.logout-btn {
 
 /* Contenedor de los botones */
 .tasks-container {
-  margin-top: 10px;
+  margin-top: 1px;
   width: 100%;
 }
 

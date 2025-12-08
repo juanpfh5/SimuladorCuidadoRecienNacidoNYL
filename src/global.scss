@@ -35,3 +35,24 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Asegura que el cuerpo de la app use todo el espacio, incluyendo detrás del notch */
+body {
+  /* Prefer runtime-provided CSS variable set from Capacitor; fall back to env() for WebKit browsers */
+  padding-top: var(--safe-area-inset-top, env(safe-area-inset-top));
+  padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom));
+  padding-left: var(--safe-area-inset-left, env(safe-area-inset-left));
+  padding-right: var(--safe-area-inset-right, env(safe-area-inset-right));
+}
+
+/* Para un encabezado/barra de navegación específica */
+.app-header {
+  padding-top: env(safe-area-inset-top);
+  /* Otros estilos para el header */
+}
+
+/* Para un pie de página/barra inferior */
+.app-footer {
+  padding-bottom: env(safe-area-inset-bottom);
+  /* Otros estilos para el footer */
+}

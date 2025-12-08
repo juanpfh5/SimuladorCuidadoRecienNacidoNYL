@@ -1,8 +1,9 @@
-import { Component, ElementRef, QueryList, ViewChildren, OnInit } from '@angular/core';
+import { Component, ElementRef, QueryList, ViewChildren, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ActivatedRoute, Router } from '@angular/router';
+import { SoundService } from '../../../services/sound.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 
@@ -13,7 +14,7 @@ import { environment } from 'src/environments/environment';
   standalone: true,
   imports: [IonicModule, CommonModule, RouterModule]
 })
-export class DormirPage implements OnInit {
+export class DormirPage implements OnInit, OnDestroy {
   progress = 0;
   completed = false;
 
@@ -34,11 +35,13 @@ export class DormirPage implements OnInit {
     'Paso 4: Arrulla (Da clic al bebé) con movimientos suaves hasta que duerma.'
   ];
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) { }
+  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router, private sound: SoundService) { }
 
   // actividadId (opcional) desde query params
   actividadId: number | null = null;
   private actividadCompletedPosted = false;
+  // ensure completion sound plays only once
+  playedCompletionSound = false;
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.queryParamMap.get('actividadId');
@@ -47,6 +50,8 @@ export class DormirPage implements OnInit {
       if (!Number.isNaN(n)) this.actividadId = n;
     }
     console.log('[Dormir] ngOnInit actividadId=', this.actividadId);
+    // start looping baby cry while on activity
+    try { this.sound.playLoop('assets/sounds/LlantoBebe.mp3'); } catch (e) {}
   }
 
   // Show inline HTML overlay (works reliably in APK)
@@ -242,7 +247,7 @@ export class DormirPage implements OnInit {
     // Después de la cobija, el usuario coloca el chupon. Tras esto deberá
     // apagar la luz (step=3) antes de poder arrullar.
     if (this.step === 2 && name === 'chupon') {
-      this.babyImg = 'assets/imgs/dormir/BebeChupon.png';
+      this.babyImg = 'assets/imgs/dormir/BebeDormido.png';
       this.step = 3; // siguiente paso: apagar la luz
       this.incrementProgress(25);
       return;
@@ -288,6 +293,11 @@ export class DormirPage implements OnInit {
     if (this.progress >= 100) {
       this.progress = 100;
       this.completed = true;
+      // stop crying and play laugh immediately (attempt in current gesture/context)
+      if (!this.playedCompletionSound) {
+        try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch(e){}
+        this.playedCompletionSound = true;
+      }
       // intentar notificar al backend
       this.completarActividad();
     }
@@ -297,7 +307,7 @@ export class DormirPage implements OnInit {
     if (this.actividadCompletedPosted) return;
     if (!this.actividadId) {
       console.warn('[Dormir] No actividadId disponible; no se enviará la petición de completar.');
-      try { window.alert('No se encontró el id de la actividad. ¿Abriste la tarea desde el modal de actividades?'); } catch (e) { }
+      try { window.alert('No fue posible registrar esta actividad como finalizada. Favor de contactar a la persona responsable en caso de que lo considere un error.'); } catch (e) { }
       return;
     }
 
@@ -315,6 +325,11 @@ export class DormirPage implements OnInit {
       try { window.alert('Tarea completada con exito'); } catch (e) { }
       if (res && res.status >= 200 && res.status < 300) {
         this.actividadCompletedPosted = true;
+        // stop crying loop and play laugh once
+        if (!this.playedCompletionSound) {
+          try { this.sound.stopLoop(); this.sound.playOnce('assets/sounds/RisaBebe.mp3'); } catch(e){}
+          this.playedCompletionSound = true;
+        }
         try {
           this.router.navigateByUrl('/home').then(() => { try { window.location.reload(); } catch (e) { } });
         } catch (e) { console.warn('[Dormir] Navigation/reload failed', e); }
@@ -325,5 +340,9 @@ export class DormirPage implements OnInit {
       console.error('[Dormir] Error al marcar actividad como completada', err);
       try { window.alert('Error al notificar al servidor. Revisa la consola (DevTools) y Network.'); } catch (e) { }
     }
+  }
+
+  ngOnDestroy(): void {
+    try { this.sound.stopAll(); } catch (e) {}
   }
 }
