@@ -56,3 +56,32 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   /* Otros estilos para el footer */
 }
+
+/* Ensure all Ionic headers/toolbars respect the runtime safe-area inset */
+ion-header,
+ion-header[translucent],
+ion-toolbar {
+  box-sizing: border-box;
+}
+
+/* Apply the safe-area inset to the toolbar inner container so content is pushed below the notch */
+ion-toolbar .toolbar-inner,
+ion-header .toolbar-inner {
+  padding-top: var(--safe-area-inset-top, env(safe-area-inset-top));
+}
+
+/* Some pages use centered cards; ensure top spacing so cards don't go under the notch */
+.center-wrap,
+.list-wrap {
+  padding-top: calc(var(--safe-area-inset-top, env(safe-area-inset-top)) + 12px);
+}
+
+/* Fix for translucent headers so content isn't hidden under the header */
+ion-content[fullscreen] {
+  --ion-safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top));
+}
+
+/* Keep footer spacing safe */
+.fixed-footer {
+  padding-bottom: calc(var(--safe-area-inset-bottom, env(safe-area-inset-bottom)) + 6px);
+}
